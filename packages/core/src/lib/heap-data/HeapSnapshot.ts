@@ -36,6 +36,7 @@ import MemLabTaggedStore from './MemLabTagStore';
 
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 const EMPTY_UINT32_ARRAY = new Uint32Array(0);
+const EMPTY_BIGINT64_ARRAY = new BigInt64Array(0);
 
 export default class HeapSnapshot implements IHeapSnapshot {
   public snapshot: RawHeapSnapshot;
@@ -44,12 +45,12 @@ export default class HeapSnapshot implements IHeapSnapshot {
   public _nodeCount = -1;
   public edges: IHeapEdges;
   public _edgeCount = -1;
-  public _nodeId2NodeIdx: NumericDictionary = {};
+  public _nodeId2NodeIdx: Uint32Array = EMPTY_UINT32_ARRAY;
   public _nodeIdxHasPathEdge: Uint8Array = EMPTY_UINT8_ARRAY;
   public _nodeIdx2PathEdgeIdx: Uint32Array = EMPTY_UINT32_ARRAY;
   public _nodeIdx2DominatorNodeIdx: Uint32Array = EMPTY_UINT32_ARRAY;
   public _nodeIdxHasDominatorNode: Uint8Array = EMPTY_UINT8_ARRAY;
-  public _nodeIdx2RetainedSize: NumericDictionary = {};
+  public _nodeIdx2RetainedSize: BigInt64Array = EMPTY_BIGINT64_ARRAY;
   public _additionalAttributes: Uint8Array = EMPTY_UINT8_ARRAY;
   public _nodeDetachednessOffset = -1;
   public _externalDetachedness: Uint8Array = EMPTY_UINT8_ARRAY;
@@ -260,7 +261,7 @@ export default class HeapSnapshot implements IHeapSnapshot {
     this._nodeIdx2DominatorNodeIdx = new Uint32Array(this._nodeCount);
     this._nodeIdxHasDominatorNode = new Uint8Array(this._nodeCount);
     // retained size info
-    this._nodeIdx2RetainedSize = Object.create(null);
+    this._nodeIdx2RetainedSize = new BigInt64Array(this._nodeCount);
     // additional attributes
     this._additionalAttributes = new Uint8Array(this._nodeCount);
     // additional detachedness info
@@ -288,7 +289,7 @@ export default class HeapSnapshot implements IHeapSnapshot {
 
   _buildNodeIdx(): void {
     info.overwrite('building node index...');
-    this._nodeId2NodeIdx = Object.create(null);
+    this._nodeId2NodeIdx = new Uint32Array(this._nodeCount);
     // iterate over each node
     const nodeValues = this.snapshot.nodes;
     const nodeFieldsCount = this._nodeFieldsCount;
